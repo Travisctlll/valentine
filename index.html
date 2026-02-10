@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Be My Valentine 💖</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background: radial-gradient(circle at bottom, #120018, #000);
+      overflow: hidden;
+      font-family: 'Comic Sans MS', cursive;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+    }
+
+    .bg img {
+      position: absolute;
+      bottom: -120px;
+      opacity: 0.95;
+      filter: drop-shadow(0 0 18px rgba(255,120,255,0.9));
+      animation: floatUp linear infinite;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    @keyframes floatUp {
+      from {
+        transform: translateY(0) scale(1) rotate(0deg);
+        opacity: 0.2;
+      }
+      to {
+        transform: translateY(-140vh) scale(1.4) rotate(360deg);
+        opacity: 1;
+      }
+    }
+
+    .card {
+      background: rgba(255,255,255,0.9);
+      padding: 22px;
+      border-radius: 24px;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(255,0,180,0.6);
+      z-index: 5;
+      width: min(92vw, 340px);
+      animation: pop 0.7s ease;
+      backdrop-filter: blur(6px);
+      position: relative;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0.5); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+
+    h1 {
+      color: #ff2e9f;
+      margin-bottom: 14px;
+      font-size: clamp(1.4rem, 4.5vw, 1.8rem);
+      text-shadow: 0 0 12px rgba(255,0,180,0.9);
+      animation: pulse 1.4s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
+    }
+
+    .btns {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      position: relative;
+      height: 52px;
+    }
+
+    button {
+      padding: 10px 18px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 14px;
+      cursor: pointer;
+      transition: transform 0.25s ease, left 0.25s ease, top 0.25s ease;
+      min-width: 88px;
+    }
+
+    .yes {
+      background: linear-gradient(45deg, #ff2e9f, #ff77c6);
+      color: white;
+      box-shadow: 0 0 18px rgba(255,0,180,0.9);
+    }
+
+    .yes:active { transform: scale(0.96); }
+
+    .no {
+      background: #eee;
+      position: absolute;
+      left: 0;
+      top: 0;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="fireworks"></canvas>
+<div class="bg" id="bg"></div>
+
+<div class="card" id="card">
+  <h1 id="text">💖 Be my Valentine? 💖</h1>
+  <div class="btns" id="btnBox">
+    <button class="yes" onclick="goYes()">Yes 😍</button>
+    <button class="no" id="noBtn" onmouseenter="softRun()" ontouchstart="softRun()">No 🙃</button>
+  </div>
+</div>
+
+<script>
+  /* ---------- SOFT NO BUTTON ---------- */
+  const texts = [
+    "😢 Болилдоо baby",
+    "🥺 За тэгвэл дахин бод доо...",
+    "😭 Би уйллаа...",
+    "💔 Үнэхээр үгүй гэж үү?",
+    "🥹 За гуйжинштээ...",
+    "😍 Тийм гэж хэлээч ээ 💖"
+  ];
+  let index = 0;
+  let scale = 1;
+
+  function softRun() {
+    const btn = document.getElementById("noBtn");
+    const box = document.getElementById("btnBox");
+    const text = document.getElementById("text");
+
+    text.innerText = texts[index % texts.length];
+    index++;
+
+    scale = Math.max(0.55, scale - 0.07);
+    btn.style.transform = `scale(${scale})`;
+
+    const boxRect = box.getBoundingClientRect();
+    const btnRect = btn.getBoundingClientRect();
+
+    const maxX = boxRect.width - btnRect.width;
+    const maxY = boxRect.height - btnRect.height;
+
+    btn.style.left = Math.random() * maxX + "px";
+    btn.style.top = Math.random() * maxY + "px";
+  }
+
+  function goYes() {
+    window.location.href = "yes.html";
+  }
+
+  /* ---------- FLOATING IMAGES ---------- */
+  const images = ["love.jpg","heart.jpg","gold.jpg","lovely.jpg","lover.jpg","mybby.jpg", "ring.jpg","couple.jpg"];
+  const bg = document.getElementById("bg");
+
+  setInterval(() => {
+    for (let i = 0; i < 2; i++) {
+      const img = document.createElement("img");
+      img.src = images[Math.floor(Math.random() * images.length)];
+      img.style.left = Math.random() * 100 + "vw";
+      img.style.width = (48 + Math.random() * 28) + "px";
+      img.style.animationDuration = (6 + Math.random() * 4) + "s";
+      bg.appendChild(img);
+      setTimeout(() => img.remove(), 10000);
+    }
+  }, 500);
+
+  /* ---------- FIREWORKS ---------- */
+  const canvas = document.getElementById("fireworks");
+  const ctx = canvas.getContext("2d");
+  let w, h;
+
+  function resize() {
+    w = canvas.width = window.innerWidth;
+    h = canvas.height = window.innerHeight;
+  }
+  window.addEventListener("resize", resize);
+  resize();
+
+  const fireworks = [];
+  const particles = [];
+
+  function randomColor() {
+    return `hsl(${Math.random() * 360}, 100%, 70%)`;
+  }
+
+  class Firework {
+    constructor() {
+      this.x = Math.random() * w;
+      this.y = h;
+      this.targetY = Math.random() * h * 0.5 + 50;
+      this.color = randomColor();
+      this.speed = 4 + Math.random() * 3;
+    }
+    update() {
+      this.y -= this.speed;
+      if (this.y <= this.targetY) {
+        this.explode();
+        return true;
+      }
+      this.draw();
+      return false;
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.fill();
+    }
+    explode() {
+      for (let i = 0; i < 42; i++) {
+        particles.push(new Particle(this.x, this.y, this.color));
+      }
+    }
+  }
+
+  class Particle {
+    constructor(x, y, color) {
+      this.x = x;
+      this.y = y;
+      this.color = color;
+      const angle = Math.random() * Math.PI * 2;
+      const speed = Math.random() * 4 + 2;
+      this.vx = Math.cos(angle) * speed;
+      this.vy = Math.sin(angle) * speed;
+      this.life = 60;
+    }
+    update() {
+      this.life--;
+      this.x += this.vx;
+      this.y += this.vy;
+      this.vy += 0.05;
+      this.draw();
+      return this.life <= 0;
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, 2.4, 0, Math.PI * 2);
+      ctx.fillStyle = this.color;
+      ctx.fill();
+    }
+  }
+
+  function animateFireworks() {
+    ctx.fillStyle = "rgba(0,0,0,0.18)";
+    ctx.fillRect(0, 0, w, h);
+
+    if (Math.random() < 0.05) fireworks.push(new Firework());
+
+    for (let i = fireworks.length - 1; i >= 0; i--) {
+      if (fireworks[i].update()) fireworks.splice(i, 1);
+    }
+
+    for (let i = particles.length - 1; i >= 0; i--) {
+      if (particles[i].update()) particles.splice(i, 1);
+    }
+
+    requestAnimationFrame(animateFireworks);
+  }
+  animateFireworks();
+</script>
+
+</body>
+</html>
